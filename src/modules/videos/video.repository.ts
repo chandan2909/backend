@@ -24,6 +24,7 @@ export const videoRepository = {
     let previousVideoId: number | null = null;
     let nextVideoId: number | null = null;
     let locked = false;
+    let isCompleted = false;
     let unlockReason = '';
 
     if (tree && tree.sections) {
@@ -32,6 +33,7 @@ export const videoRepository = {
 
       if (currentIndex !== -1) {
         locked = flattenedVideos[currentIndex].locked;
+        isCompleted = flattenedVideos[currentIndex].is_completed || false;
         if (locked) unlockReason = 'Complete previous video';
         
         if (currentIndex > 0) {
@@ -48,6 +50,7 @@ export const videoRepository = {
       previous_video_id: previousVideoId,
       next_video_id: nextVideoId,
       locked,
+      is_completed: isCompleted,
       unlock_reason: unlockReason
     };
   }
