@@ -13,7 +13,7 @@ const envSchema = z.object({
   DB_NAME: z.string(),
   JWT_ACCESS_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
-  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  FRONTEND_URL: z.string().default('http://localhost:3000'),
   COOKIE_DOMAIN: z.string().optional(),
 });
 
