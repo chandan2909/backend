@@ -71,5 +71,17 @@ export const authController = {
       email: user.email,
       created_at: user.created_at
     });
+  }),
+
+  deleteAccount: asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    await userRepository.delete(userId);
+    res.clearCookie('refresh_token', cookieOptions);
+    res.status(200).json({ message: 'Account deleted successfully' });
   })
 };

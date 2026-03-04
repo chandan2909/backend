@@ -29,5 +29,25 @@ export const userRepository = {
       [email, passwordHash, name]
     );
     return result.insertId;
+  },
+
+  async delete(userId: number): Promise<void> {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      
+      // Delete in order to respect foreign key constraints
+      await connection.query('DELETE FROM video_progress WHERE user_id = ?', [userId]);
+      await connection.query('DELETE FROM enrollments WHERE user_id = ?', [userId]);
+      await connection.query('DELETE FROM refresh_tokens WHERE user_id = ?', [userId]);
+      await connection.query('DELETE FROM users WHERE id = ?', [userId]);
+      
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 };
