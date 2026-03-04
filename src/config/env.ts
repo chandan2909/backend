@@ -14,6 +14,7 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
+  CORS_ORIGIN: z.string().optional(), // Fallback if user accidentally used this
   COOKIE_DOMAIN: z.string().optional(),
 });
 

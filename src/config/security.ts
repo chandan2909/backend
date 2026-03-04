@@ -1,8 +1,11 @@
 import cors from 'cors';
 import { env } from './env';
 
+const origins = (env.FRONTEND_URL || env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim());
+console.log('🛡️  CORS Origins allowed:', origins);
+
 export const corsOptions = {
-  origin: env.FRONTEND_URL,
+  origin: origins.length === 1 ? origins[0] : origins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
