@@ -8,14 +8,14 @@ export const progressRepository = {
         s.id as subject_id,
         s.title as subject_title,
         COUNT(v.id) as total_videos,
-        SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) as completed_videos,
-        COUNT(vp.id) as accessed_videos
-      FROM subjects s
-      JOIN sections sec ON sec.subject_id = s.id
-      JOIN videos v ON v.section_id = sec.id
-      LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = ?
+        SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) as completed_videos
+      FROM enrollments e
+      JOIN subjects s ON e.subject_id = s.id
+      LEFT JOIN sections sec ON sec.subject_id = s.id
+      LEFT JOIN videos v ON v.section_id = sec.id
+      LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = e.user_id
+      WHERE e.user_id = ?
       GROUP BY s.id, s.title
-      HAVING accessed_videos > 0
     `, [userId]);
 
     return rows.map(r => {

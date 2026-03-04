@@ -94,5 +94,16 @@ export const subjectRepository = {
      }
 
      return null;
+  },
+
+  async enrollUser(userId: number, subjectIds: number[]): Promise<void> {
+    if (subjectIds.length === 0) return;
+
+    const values = subjectIds.map(id => [userId, id]);
+    // Note: Using INSERT IGNORE to skip existing enrollments
+    await pool.query(
+      'INSERT IGNORE INTO enrollments (user_id, subject_id) VALUES ?',
+      [values]
+    );
   }
 };

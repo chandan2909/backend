@@ -48,5 +48,18 @@ export const subjectController = {
     }
 
     res.json({ videoId });
+  }),
+
+  enroll: asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user!.userId;
+    const { subjectIds } = req.body;
+
+    if (!Array.isArray(subjectIds)) {
+      res.status(400).json({ error: 'subjectIds must be an array' });
+      return;
+    }
+
+    await subjectRepository.enrollUser(userId, subjectIds);
+    res.json({ success: true });
   })
 };
