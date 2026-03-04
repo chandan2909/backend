@@ -1,7 +1,18 @@
 import cors from 'cors';
 import { env } from './env';
 
-const origins = (env.FRONTEND_URL || env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim());
+const rawOrigins = (env.FRONTEND_URL || env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim());
+const origins = rawOrigins.map(origin => {
+  if (origin.startsWith('http://') || origin.startsWith('https://')) {
+    return origin;
+  }
+  // Default to https for production-like domains, http for localhost
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    return `http://${origin}`;
+  }
+  return `https://${origin}`;
+});
+
 console.log('🛡️  CORS Origins allowed:', origins);
 
 export const corsOptions = {
