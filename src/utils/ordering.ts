@@ -3,8 +3,8 @@
  * Used by Subjects and Videos logic to verify previous/next and locking.
  */
 export function buildSubjectTreeWithLocks(sections: any[], videos: any[], progressMap: Map<number, boolean>) {
-  let globalLocked = false;
-  let lastCompleted = true; // pretend previous before first was completed
+  let isFirstOverallVideo = true;
+  let lastCompleted = true; 
 
   const treeSections = sections.map((section) => {
     const secVideos = videos
@@ -14,9 +14,14 @@ export function buildSubjectTreeWithLocks(sections: any[], videos: any[], progre
     const mappedVideos = secVideos.map((video) => {
       const isCompleted = progressMap.get(video.id) || false;
       
-      // If the previous video was NOT completed, this one and all subsequent are locked
-      if (!lastCompleted) {
-        globalLocked = true;
+      // A video is unlocked if:
+      // 1. It's the first video of the whole course.
+      // 2. The previous video was completed.
+      // 3. The video itself is already completed (in case of manual override or if user watched it out of order).
+      
+      let videoLocked = false;
+      if (!isFirstOverallVideo && !lastCompleted && !isCompleted) {
+        videoLocked = true;
       }
 
       const videoData = {
@@ -24,11 +29,12 @@ export function buildSubjectTreeWithLocks(sections: any[], videos: any[], progre
         title: video.title,
         order_index: video.order_index,
         is_completed: isCompleted,
-        locked: globalLocked
+        locked: videoLocked
       };
 
-      // update lastCompleted for the next iteration
+      // update lastCompleted for the NEXT video in the iteration
       lastCompleted = isCompleted;
+      isFirstOverallVideo = false;
 
       return videoData;
     });

@@ -8,8 +8,11 @@ export const videoController = {
     const userId = (req as any).user!.userId;
 
     const video = await videoRepository.getVideoMeta(videoId, userId);
-    if (!video) {
-        res.status(404).json({ error: 'Video not found' });
+    if (video.locked) {
+        res.status(403).json({ 
+            error: 'This video is locked. Please complete previous lessons first.',
+            unlock_reason: video.unlock_reason
+        });
         return;
     }
 
