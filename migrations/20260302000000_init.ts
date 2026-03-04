@@ -1,0 +1,99 @@
+import type { Knex } from "knex";
+
+export async function up(knex: Knex): Promise<void> {
+  // users
+  await knex.schema.createTable("users", (table) => {
+    table.bigIncrements("id").primary();
+    table.string("email").notNullable().unique().index();
+    table.string("password_hash").notNullable();
+    table.string("name").notNullable();
+    table.timestamps(true, true);
+  });
+
+  // subjects
+  await knex.schema.createTable("subjects", (table) => {
+    table.bigIncrements("id").primary();
+    table.string("title").notNullable();
+    table.string("slug").notNullable().unique().index();
+    table.text("description");
+    table.boolean("is_published").defaultTo(false);
+    table.timestamps(true, true);
+  });
+
+  // sections
+  await knex.schema.createTable("sections", (table) => {
+    table.bigIncrements("id").primary();
+    table.bigInteger("subject_id").unsigned().notNullable()
+      .references("id").inTable("subjects").onDelete("CASCADE");
+    table.string("title").notNullable();
+    table.integer("order_index").notNullable();
+    table.timestamps(true, true);
+    
+    table.unique(["subject_id", "order_index"]);
+  });
+
+  // videos
+  await knex.schema.createTable("videos", (table) => {
+    table.bigIncrements("id").primary();
+    table.bigInteger("section_id").unsigned().notNullable()
+      .references("id").inTable("sections").onDelete("CASCADE");
+    table.string("title").notNullable();
+    table.text("description");
+    table.string("youtube_url").notNullable();
+    table.integer("order_index").notNullable();
+    table.integer("duration_seconds").nullable();
+    table.timestamps(true, true);
+
+    table.unique(["section_id", "order_index"]);
+  });
+
+  // enrollments
+  await knex.schema.createTable("enrollments", (table) => {
+    table.bigIncrements("id").primary();
+    table.bigInteger("user_id").unsigned().notNullable()
+      .references("id").inTable("users").onDelete("CASCADE");
+    table.bigInteger("subject_id").unsigned().notNullable()
+      .references("id").inTable("subjects").onDelete("CASCADE");
+    table.timestamp("created_at").defaultTo(knex.fn.now());
+
+    table.unique(["user_id", "subject_id"]);
+  });
+
+  // video_progress
+  await knex.schema.createTable("video_progress", (table) => {
+    table.bigIncrements("id").primary();
+    table.bigInteger("user_id").unsigned().notNullable()
+      .references("id").inTable("users").onDelete("CASCADE");
+    table.bigInteger("video_id").unsigned().notNullable()
+      .references("id").inTable("videos").onDelete("CASCADE");
+    table.integer("last_position_seconds").defaultTo(0);
+    table.boolean("is_completed").defaultTo(false);
+    table.timestamp("completed_at").nullable();
+    table.timestamps(true, true);
+
+    table.unique(["user_id", "video_id"]);
+  });
+
+  // refresh_tokens
+  await knex.schema.createTable("refresh_tokens", (table) => {
+    table.bigIncrements("id").primary();
+    table.bigInteger("user_id").unsigned().notNullable()
+      .references("id").inTable("users").onDelete("CASCADE");
+    table.string("token_hash").notNullable();
+    table.timestamp("expires_at").notNullable();
+    table.timestamp("revoked_at").nullable();
+    table.timestamp("created_at").defaultTo(knex.fn.now());
+
+    table.index(["user_id", "token_hash"]);
+  });
+}
+
+export async function down(knex: Knex): Promise<void> {
+  await knex.schema.dropTableIfExists("refresh_tokens");
+  await knex.schema.dropTableIfExists("video_progress");
+  await knex.schema.dropTableIfExists("enrollments");
+  await knex.schema.dropTableIfExists("videos");
+  await knex.schema.dropTableIfExists("sections");
+  await knex.schema.dropTableIfExists("subjects");
+  await knex.schema.dropTableIfExists("users");
+}
