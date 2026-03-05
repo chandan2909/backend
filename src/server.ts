@@ -8,15 +8,11 @@ const PORT = env.PORT || 5000;
 // Render spins down free-tier instances after 15 minutes of inactivity.
 // Pinging our own public URL every 14 minutes keeps it awake.
 const pingRenderUrl = () => {
-  const url = 'https://lms-backend-uvp5.onrender.com/api/health';
+  const url = 'https://lms-backednd.onrender.com/api/health';
   https.get(url, (res) => {
-    if (res.statusCode === 200) {
-      console.log(`[KeepAlive] Backend self-ping successful at ${new Date().toISOString()}`);
-    } else {
-      console.log(`[KeepAlive] Backend self-ping failed with status ${res.statusCode}`);
-    }
+    // Silently ping
   }).on('error', (err) => {
-    console.error('[KeepAlive] Backend self-ping error:', err.message);
+    // Silently handle error
   });
 };
 
