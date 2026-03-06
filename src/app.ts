@@ -6,6 +6,7 @@ import authRoutes from './modules/auth/auth.routes';
 import subjectRoutes from './modules/subjects/subject.routes';
 import videoRoutes from './modules/videos/video.routes';
 import progressRoutes from './modules/progress/progress.routes';
+import chatRoutes from './modules/chat/chat.routes';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/chats', chatRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
