@@ -8,6 +8,7 @@ export interface Subject {
   slug: string;
   description: string;
   is_published: boolean;
+  thumbnail_url?: string;
 }
 
 export const subjectRepository = {

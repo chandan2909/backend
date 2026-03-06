@@ -1,0 +1,11 @@
+[dotenv@17.3.1] injecting env (10) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+12|CS50: Introduction to Computer Science|8mAITcNt710
+13|Introduction to Computer Science in Python|nykOeWgQcHM
+14|Web Development for Beginners|UB1O30fR-EE
+15|Data Structures and Algorithms|0IAPZzGSbME
+16|Machine Learning for Beginners|GwIo3gDZCVQ
+17|React.js Complete Guide|w7ejDZ8SWv8
+18|Python for Data Science|_uQrJ0TkZlc
+19|SQL & Database Design|HXV3zeQKqGY
+20|DevOps with Docker & Kubernetes|wBp0Rb-ZJak
+21|TypeScript Masterclass|BwuLxPH8IDs
