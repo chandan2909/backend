@@ -4,15 +4,15 @@ import { ChatRepository } from './chat.repository';
 
 export const getUserChats = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
-  if (!user?.id) {
+  if (!user?.userId) {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
-  const chats = await ChatRepository.getChatsForUser(Number(user.id));
+  const chats = await ChatRepository.getChatsForUser(Number(user.userId));
 
   const chatsWithMessages = await Promise.all(
     chats.map(async (chat) => {
-      const messages = await ChatRepository.getMessagesForChat(chat.id, Number(user.id));
+      const messages = await ChatRepository.getMessagesForChat(chat.id, Number(user.userId));
       return {
         id: chat.id,
         title: chat.title,
@@ -27,16 +27,16 @@ export const getUserChats = asyncHandler(async (req: Request, res: Response) => 
 
 export const createChat = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
-  if (!user?.id) {
+  if (!user?.userId) {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
   const { id, title, createdAt, initialMessage } = req.body;
 
-  await ChatRepository.createChat(id, Number(user.id), title, createdAt);
+  await ChatRepository.createChat(id, Number(user.userId), title, createdAt);
 
   if (initialMessage) {
-    await ChatRepository.addMessage(id, Number(user.id), initialMessage.role, initialMessage.content, createdAt);
+    await ChatRepository.addMessage(id, Number(user.userId), initialMessage.role, initialMessage.content, createdAt);
   }
 
   res.status(201).json({ message: 'Chat created successfully' });
@@ -44,17 +44,17 @@ export const createChat = asyncHandler(async (req: Request, res: Response) => {
 
 export const addMessage = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
-  if (!user?.id) {
+  if (!user?.userId) {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
   const chatId = req.params.id as string;
   const { role, content, createdAt, title } = req.body;
 
-  await ChatRepository.addMessage(chatId, Number(user.id), role, content, createdAt);
+  await ChatRepository.addMessage(chatId, Number(user.userId), role, content, createdAt);
 
   if (title) {
-    await ChatRepository.updateChatTitle(chatId, Number(user.id), title, createdAt);
+    await ChatRepository.updateChatTitle(chatId, Number(user.userId), title, createdAt);
   }
 
   res.status(201).json({ message: 'Message added successfully' });
@@ -62,11 +62,11 @@ export const addMessage = asyncHandler(async (req: Request, res: Response) => {
 
 export const deleteChat = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
-  if (!user?.id) {
+  if (!user?.userId) {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
   const chatId = req.params.id as string;
-  await ChatRepository.deleteChat(chatId, Number(user.id));
+  await ChatRepository.deleteChat(chatId, Number(user.userId));
   res.json({ message: 'Chat deleted successfully' });
 });
