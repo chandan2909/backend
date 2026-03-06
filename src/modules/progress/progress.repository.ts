@@ -7,6 +7,7 @@ export const progressRepository = {
       SELECT 
         s.id as subject_id,
         s.title as subject_title,
+        s.thumbnail_url as thumbnail_url,
         COUNT(v.id) as total_videos,
         SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) as completed_videos
       FROM enrollments e
@@ -15,7 +16,7 @@ export const progressRepository = {
       LEFT JOIN videos v ON v.section_id = sec.id
       LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = e.user_id
       WHERE e.user_id = ?
-      GROUP BY s.id, s.title
+      GROUP BY s.id, s.title, s.thumbnail_url
     `, [userId]);
 
     return rows.map(r => {
@@ -24,6 +25,7 @@ export const progressRepository = {
       return {
         subject_id: r.subject_id,
         subject_title: r.subject_title,
+        thumbnail_url: r.thumbnail_url || null,
         total_videos: total,
         completed_videos: completed,
         completion_percentage: total > 0 ? (completed / total) * 100 : 0
