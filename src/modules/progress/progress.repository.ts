@@ -8,6 +8,7 @@ export const progressRepository = {
         s.id as subject_id,
         s.title as subject_title,
         s.thumbnail_url as thumbnail_url,
+        MIN(e.created_at) as enrolled_at,
         COUNT(v.id) as total_videos,
         SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) as completed_videos
       FROM enrollments e
@@ -26,6 +27,7 @@ export const progressRepository = {
         subject_id: r.subject_id,
         subject_title: r.subject_title,
         thumbnail_url: r.thumbnail_url || null,
+        enrolled_at: r.enrolled_at,
         total_videos: total,
         completed_videos: completed,
         completion_percentage: total > 0 ? (completed / total) * 100 : 0
