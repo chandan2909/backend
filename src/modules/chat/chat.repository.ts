@@ -43,8 +43,9 @@ export class ChatRepository {
   }
 
   static async createChat(id: string, userId: number, title: string, createdAt: number): Promise<void> {
+    // INSERT IGNORE to be safe against duplicate calls
     await pool.query(
-      'INSERT INTO chats (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      'INSERT IGNORE INTO chats (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
       [id, userId, title, createdAt, createdAt]
     );
   }
@@ -57,7 +58,14 @@ export class ChatRepository {
   }
 
   static async addMessage(chatId: string, userId: number, role: 'user' | 'assistant', content: string, createdAt: number): Promise<number> {
-    // Ensure chat belongs to user and update its updated_at timestamp
+    // Upsert the chat row so the FK constraint never fails, even if a race condition
+    // caused the previous POST /chats request to fail silently on the frontend.
+    await pool.query(
+      'INSERT IGNORE INTO chats (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      [chatId, userId, 'Chat', createdAt, createdAt]
+    );
+
+    // Now update the timestamp and insert the message safely
     await pool.query(
       'UPDATE chats SET updated_at = ? WHERE id = ? AND user_id = ?',
       [createdAt, chatId, userId]
