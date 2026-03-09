@@ -4,7 +4,8 @@ import {
   getUserChats,
   createChat,
   addMessage,
-  deleteChat
+  deleteChat,
+  streamChatResponse
 } from './chat.controller';
 
 const router = Router();
@@ -20,5 +21,8 @@ router.post('/:id/messages', authenticate, addMessage);
 
 // Delete an entire chat session
 router.delete('/:id', authenticate, deleteChat);
+
+// Proxy streaming requests to Hugging Face
+router.post('/stream', authenticate, streamChatResponse);
 
 export default router;

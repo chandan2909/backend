@@ -70,3 +70,56 @@ export const deleteChat = asyncHandler(async (req: Request, res: Response) => {
   await ChatRepository.deleteChat(chatId, Number(user.userId));
   res.json({ message: 'Chat deleted successfully' });
 });
+
+export const streamChatResponse = async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (!user?.userId) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  const { message, history } = req.body;
+
+  const messages = [{ role: 'system', content: 'You are Kodemy AI Assistant, a helpful learning assistant. Provide clear and concise answers.' }];
+  if (history && Array.isArray(history)) {
+    messages.push(...history.map((m: any) => ({ role: m.role, content: m.content })));
+  }
+  messages.push({ role: 'user', content: message });
+
+  try {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders(); // Ensure headers are sent immediately
+
+    const hfResponse = await fetch("https://spoidermon29-lms-ai-assistant.hf.space/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: messages,
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 1024
+      })
+    });
+
+    if (!hfResponse.ok) {
+      throw new Error(`AI Server Error: ${hfResponse.status}`);
+    }
+
+    if (hfResponse.body) {
+      const reader = hfResponse.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+    }
+    res.end();
+  } catch (error) {
+    console.error("Streaming error:", error);
+    res.write(`data: ${JSON.stringify({ error: "Failed to connect to AI" })}\n\n`);
+    res.end();
+  }
+};
+
