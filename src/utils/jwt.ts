@@ -6,8 +6,10 @@ export interface JwtPayload {
 }
 
 export function generateAccessToken(payload: JwtPayload): string {
-  // 15 minutes as specified
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  // Extended to 7 days for cross-origin Vercel+Render deployment
+  // (short expiry causes refresh failures since the refresh_token cookie
+  //  is not reliably sent cross-origin in all browsers/configs)
+  return jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '7d' });
 }
 
 export function generateRefreshToken(payload: JwtPayload): string {
