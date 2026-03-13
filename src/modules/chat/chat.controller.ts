@@ -88,17 +88,18 @@ export const streamChatResponse = async (req: Request, res: Response) => {
   messages.push({ role: 'user', content: message });
 
   try {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders(); // Ensure headers are sent immediately
-
     const apiKey = process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
       console.error("Missing GEMINI_API_KEY in environment variables.");
       return res.status(500).json({ error: "Server configuration error: missing AI provider key." });
     }
+
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders(); // Ensure headers are sent immediately
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -124,7 +125,10 @@ export const streamChatResponse = async (req: Request, res: Response) => {
 
     const chat = model.startChat({
       history: formattedHistory,
-      systemInstruction: 'You are Kodemy AI Assistant, a helpful learning assistant. Provide clear and concise answers.'
+      systemInstruction: {
+        role: 'system',
+        parts: [{ text: 'You are Kodemy AI Assistant, a helpful learning assistant. Provide clear and concise answers.' }]
+      }
     });
 
     const result = await chat.sendMessageStream(message);
