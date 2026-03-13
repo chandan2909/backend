@@ -106,22 +106,26 @@ export const streamChatResponse = async (req: Request, res: Response) => {
 
     const formattedHistory = [];
     if (history && Array.isArray(history)) {
-      // Filter out empty messages and the initial system greeting if it is the first message
-      // (Gemini requires history to start with a 'user' message)
       const validHistory = history.filter(m => m.content && m.content.trim() !== '');
       
-      for (let i = 0; i < validHistory.length; i++) {
-        const m = validHistory[i];
+      let lastRole = '';
+      for (const m of validHistory) {
+        let role = m.role === 'user' ? 'user' : 'model';
         
-        // If it's the first message and it's NOT from the user, skip it
-        if (i === 0 && m.role !== 'user') continue;
+        // Gemini requires strictly alternating user/model roles.
+        // It must also start with 'user'.
+        if (formattedHistory.length === 0 && role !== 'user') continue;
+        if (role === lastRole) continue;
         
         formattedHistory.push({
-          role: m.role === 'user' ? 'user' : 'model',
+          role,
           parts: [{ text: m.content }]
         });
+        lastRole = role;
       }
     }
+
+    console.log(`🚀 Starting Gemini stream for user ${user.userId}. History length: ${formattedHistory.length}`);
 
     const chat = model.startChat({
       history: formattedHistory,
@@ -133,8 +137,11 @@ export const streamChatResponse = async (req: Request, res: Response) => {
 
     const result = await chat.sendMessageStream(message);
 
+    let fullResponse = "";
     for await (const chunk of result.stream) {
       const chunkText = chunk.text();
+      fullResponse += chunkText;
+      
       const payload = {
         choices: [{
           delta: {
@@ -145,6 +152,7 @@ export const streamChatResponse = async (req: Request, res: Response) => {
       res.write(`data: ${JSON.stringify(payload)}\n\n`);
     }
     
+    console.log(`✅ Gemini stream complete. Response length: ${fullResponse.length}`);
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (error: any) {
