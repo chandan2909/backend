@@ -105,7 +105,16 @@ export const streamChatResponse = async (req: Request, res: Response) => {
 
     const formattedHistory = [];
     if (history && Array.isArray(history)) {
-      for (const m of history) {
+      // Filter out empty messages and the initial system greeting if it is the first message
+      // (Gemini requires history to start with a 'user' message)
+      const validHistory = history.filter(m => m.content && m.content.trim() !== '');
+      
+      for (let i = 0; i < validHistory.length; i++) {
+        const m = validHistory[i];
+        
+        // If it's the first message and it's NOT from the user, skip it
+        if (i === 0 && m.role !== 'user') continue;
+        
         formattedHistory.push({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.content }]
