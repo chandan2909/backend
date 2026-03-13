@@ -93,7 +93,13 @@ export const streamChatResponse = async (req: Request, res: Response) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders(); // Ensure headers are sent immediately
 
-    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyBRJLFd0EpFB0MadZd9WqcfzTbpmenQja0";
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      console.error("Missing GEMINI_API_KEY in environment variables.");
+      return res.status(500).json({ error: "Server configuration error: missing AI provider key." });
+    }
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
