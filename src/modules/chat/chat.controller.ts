@@ -74,10 +74,7 @@ export const deleteChat = asyncHandler(async (req: Request, res: Response) => {
 
 export const streamChatResponse = async (req: Request, res: Response) => {
   const user = (req as any).user;
-  if (!user?.userId) {
-    res.status(401).json({ message: 'Unauthorized' });
-    return;
-  }
+  const userId = user?.userId || 'guest';
 
   const { message, history } = req.body;
 
@@ -125,7 +122,7 @@ export const streamChatResponse = async (req: Request, res: Response) => {
       }
     }
 
-    console.log(`🚀 Starting Gemini stream for user ${user.userId}. History length: ${formattedHistory.length}`);
+    console.log(`🚀 Starting Gemini stream for user ${userId}. History length: ${formattedHistory.length}`);
 
     const chat = model.startChat({
       history: formattedHistory,

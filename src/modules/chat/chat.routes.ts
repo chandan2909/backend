@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate } from '../../middleware/authMiddleware';
+import { authenticate, optionalAuthenticate } from '../../middleware/authMiddleware';
 import {
   getUserChats,
   createChat,
@@ -22,7 +22,7 @@ router.post('/:id/messages', authenticate, addMessage);
 // Delete an entire chat session
 router.delete('/:id', authenticate, deleteChat);
 
-// Proxy streaming requests to Hugging Face
-router.post('/stream', authenticate, streamChatResponse);
+// Proxy streaming requests to Hugging Face (now Gemini)
+router.post('/stream', optionalAuthenticate, streamChatResponse);
 
 export default router;
