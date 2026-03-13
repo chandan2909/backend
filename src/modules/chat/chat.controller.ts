@@ -134,9 +134,9 @@ export const streamChatResponse = async (req: Request, res: Response) => {
     
     res.write('data: [DONE]\n\n');
     res.end();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Streaming error:", error);
-    res.write(`data: ${JSON.stringify({ error: "Failed to connect to AI" })}\n\n`);
+    res.write(`data: ${JSON.stringify({ error: error?.message || "Failed to connect to AI" })}\n\n`);
     res.end();
   }
 };
