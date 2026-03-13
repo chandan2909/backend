@@ -102,7 +102,7 @@ export const streamChatResponse = async (req: Request, res: Response) => {
     res.flushHeaders(); // Ensure headers are sent immediately
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const formattedHistory = [];
     if (history && Array.isArray(history)) {
