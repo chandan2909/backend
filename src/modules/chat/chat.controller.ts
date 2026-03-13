@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ChatRepository } from './chat.repository';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const getUserChats = asyncHandler(async (req: Request, res: Response) => {
   const user = (req as any).user;
@@ -92,29 +93,40 @@ export const streamChatResponse = async (req: Request, res: Response) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders(); // Ensure headers are sent immediately
 
-    const hfResponse = await fetch("https://spoidermon29-lms-ai-assistant.hf.space/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: messages,
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 1024
-      })
-    });
+    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyBRJLFd0EpFB0MadZd9WqcfzTbpmenQja0";
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    if (!hfResponse.ok) {
-      throw new Error(`AI Server Error: ${hfResponse.status}`);
-    }
-
-    if (hfResponse.body) {
-      const reader = hfResponse.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        res.write(value);
+    const formattedHistory = [];
+    if (history && Array.isArray(history)) {
+      for (const m of history) {
+        formattedHistory.push({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }]
+        });
       }
     }
+
+    const chat = model.startChat({
+      history: formattedHistory,
+      systemInstruction: 'You are Kodemy AI Assistant, a helpful learning assistant. Provide clear and concise answers.'
+    });
+
+    const result = await chat.sendMessageStream(message);
+
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      const payload = {
+        choices: [{
+          delta: {
+            content: chunkText
+          }
+        }]
+      };
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    }
+    
+    res.write('data: [DONE]\n\n');
     res.end();
   } catch (error) {
     console.error("Streaming error:", error);

@@ -1,7 +1,7 @@
 import cors from 'cors';
 import { env } from './env';
 
-const rawOrigins = (env.FRONTEND_URL || env.CORS_ORIGIN || 'http://localhost:3000').split(',').map(o => o.trim());
+const rawOrigins = (env.FRONTEND_URL || env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:5173').split(',').map(o => o.trim());
 const origins = rawOrigins.map(origin => {
   if (origin.startsWith('http://') || origin.startsWith('https://')) {
     return origin;
