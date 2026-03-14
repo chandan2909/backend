@@ -1,0 +1,28 @@
+import { Router } from 'express';
+import { authenticate, optionalAuthenticate } from '../../middleware/authMiddleware.js';
+import {
+  getUserChats,
+  createChat,
+  addMessage,
+  deleteChat,
+  streamChatResponse
+} from './chat.controller.js';
+
+const router = Router();
+
+// Retrieve all user chats and their messages
+router.get('/', authenticate, getUserChats);
+
+// Create a new chat session (optionally with an initial message)
+router.post('/', authenticate, createChat);
+
+// Append a message to an existing chat session
+router.post('/:id/messages', authenticate, addMessage);
+
+// Delete an entire chat session
+router.delete('/:id', authenticate, deleteChat);
+
+// Proxy streaming requests to Hugging Face (now Gemini)
+router.post('/stream', optionalAuthenticate, streamChatResponse);
+
+export default router;
