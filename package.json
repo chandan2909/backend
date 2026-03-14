@@ -7,7 +7,8 @@
     "test": "jest",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "migrate": "npx knex migrate:latest"
+    "migrate": "npx knex migrate:latest",
+    "build": "echo 'No build step required for JS'"
   },
   "keywords": [],
   "author": "",
