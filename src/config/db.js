@@ -8,7 +8,7 @@ export const dbOptions = {
   password: env.DB_PASSWORD,
   database: env.DB_NAME,
   ssl: {
-    rejectUnauthorized: env.NODE_ENV === 'production'
+    rejectUnauthorized: false
   }
 };
 
