@@ -4,15 +4,38 @@ export const progressRepository = {
   async getProgressOverview(userId) {
     const [rows] = await pool.query(
       `SELECT 
-        COUNT(DISTINCT s.id) as total_subjects,
-        COUNT(DISTINCT e.subject_id) as enrolled_subjects,
-        (SELECT COUNT(*) FROM video_progress vp WHERE vp.user_id = ? AND vp.is_completed = 1) as completed_videos
-      FROM subjects s
-      LEFT JOIN enrollments e ON s.id = e.subject_id AND e.user_id = ?
-      WHERE s.is_published = 1`,
+        e.subject_id,
+        s.title AS subject_title,
+        e.created_at AS enrolled_at,
+        COUNT(v.id) AS total_videos,
+        SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) AS completed_videos,
+        ROUND(
+          CASE WHEN COUNT(v.id) > 0 
+            THEN (SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) / COUNT(v.id)) * 100 
+            ELSE 0 
+          END, 1
+        ) AS completion_percentage,
+        (
+          SELECT CONCAT('https://img.youtube.com/vi/', 
+            SUBSTRING_INDEX(SUBSTRING_INDEX(v2.youtube_url, 'v=', -1), '&', 1), 
+            '/hqdefault.jpg')
+          FROM videos v2 
+          JOIN sections sec2 ON v2.section_id = sec2.id 
+          WHERE sec2.subject_id = e.subject_id 
+          ORDER BY sec2.order_index ASC, v2.order_index ASC 
+          LIMIT 1
+        ) AS thumbnail_url
+      FROM enrollments e
+      JOIN subjects s ON e.subject_id = s.id AND s.is_published = 1
+      LEFT JOIN sections sec ON sec.subject_id = s.id
+      LEFT JOIN videos v ON v.section_id = sec.id
+      LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = ?
+      WHERE e.user_id = ?
+      GROUP BY e.subject_id, s.title, e.created_at
+      ORDER BY e.created_at DESC`,
       [userId, userId]
     );
-    return rows[0];
+    return rows;
   },
 
   async getSubjectProgress(subjectId, userId) {
