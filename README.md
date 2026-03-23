@@ -1,24 +1,24 @@
 # 📚 LMS Backend
 
-REST API server for the Learning Management System, built with **Express.js** and **TypeScript**.
+REST API server for the Learning Management System, built with **Express.js** and **JavaScript**.
 
 ## Tech Stack
 
 | Layer        | Technology                          |
 | ------------ | ----------------------------------- |
-| Runtime      | Node.js + TypeScript                |
+| Runtime      | Node.js + JavaScript                |
 | Framework    | Express 5                           |
 | Database     | MySQL (via Knex.js query builder)   |
 | Auth         | JWT (access + refresh tokens), bcrypt |
 | Validation   | Zod                                 |
-| Testing      | Jest + ts-jest                       |
+| Testing      | Jest                                 |
 
 ## Project Structure
 
 ```
 src/
-├── server.ts            # Entry point — starts the HTTP server
-├── app.ts               # Express app setup (middleware, routes)
+├── server.js            # Entry point — starts the HTTP server
+├── app.js               # Express app setup (middleware, routes)
 ├── config/              # Database & app configuration
 ├── middleware/           # Auth middleware (JWT verification)
 ├── modules/             # Feature modules (domain-driven)
@@ -30,12 +30,11 @@ src/
 │   ├── subjects/        # Subjects / courses
 │   ├── users/           # User management
 │   └── videos/          # Video content
-├── types/               # Shared TypeScript types
 ├── utils/               # Helper utilities
 └── __tests__/           # Unit tests
 migrations/              # Knex database migrations
-knexfile.ts              # Knex configuration
-seed.ts                  # Database seeding script
+knexfile.js              # Knex configuration
+seed.js                  # Database seeding script
 ```
 
 ## Getting Started
@@ -83,7 +82,7 @@ npm run migrate
 Optionally seed the database:
 
 ```bash
-npx ts-node seed.ts
+node seed.js
 ```
 
 ### Running
@@ -121,6 +120,5 @@ npm test
 The backend is designed to be deployed on **Render** (or any Node.js host).
 
 ```bash
-npm run build   # Compile TypeScript → dist/
-npm start       # Run compiled output
+npm start       # Run the server
 ```
