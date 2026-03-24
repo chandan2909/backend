@@ -20,9 +20,7 @@ export function buildSubjectTreeWithLocks(sections, videos, progressMap) {
       }
 
       const videoData = {
-        id: video.id,
-        title: video.title,
-        order_index: video.order_index,
+        ...video,
         is_completed: isCompleted,
         locked: videoLocked
       };
